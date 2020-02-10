@@ -1,0 +1,8 @@
+export content as yaml:
+  title: 'Export content as YAML'
+export content to cloud:
+  title: 'Export content to cloud'
+import content from yaml:
+  title: 'Import content from YAML'
+manage osk export module:
+  title: 'Manage OSK export module'

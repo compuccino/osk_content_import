@@ -1,0 +1,10 @@
+name: Content Export Crop
+description: This module extends importing and exporting of crop content.
+package: OSK
+
+type: module
+core: 8.x
+
+dependencies:
+  - osk_content_import
+  - drupal:crop

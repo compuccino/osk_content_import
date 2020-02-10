@@ -1,0 +1,5 @@
+services:
+  osk_content_import.command:
+    class: Drupal\osk_content_import\Commands\ContentCommands
+    tags:
+      -  { name: drush.command }

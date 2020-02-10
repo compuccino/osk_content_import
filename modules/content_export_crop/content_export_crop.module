@@ -1,0 +1,47 @@
+<?php
+
+/**
+ * @file
+ * Contains content_export_crop.module.
+ */
+
+/**
+ * Implements hook_oci_extend_entity_tree().
+ */
+function content_export_crop_oci_extend_entity_tree(&$dependencies, &$previous, $entity, $entity_type, $id, $bundle_type) {
+  $entity_tree = \Drupal::service('osk_content_import.osk_get_entity_tree');
+  if ($entity_type == 'file') {
+    // Query for crops for this file.
+    $query = \Drupal::entityTypeManager()->getStorage('crop')->getQuery();
+    $cids = $query->condition('entity_id', $id)->condition('entity_type', $entity_type)->execute();
+    $i = 0;
+    foreach ($cids as $cid) {
+      $dependency = $entity_tree->getArrayRepresentation('crop', $cid);
+      if (is_array($dependency)) {
+        $dependencies[$i] = $dependency;
+        $dependencies[$i][0]['name'] = $dependency[0]['bundle'];
+        $i++;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_oci_export_entity_alter().
+ */
+function content_export_crop_oci_export_entity_alter(&$entity_export) {
+  if ($entity_export['entity_type'] == 'crop') {
+    // Create the file as a hash.
+    if (isset($entity_export['representation']['entity_id'][0]['value'])) {
+      $id = $entity_export['representation']['entity_id'][0]['value'];
+      $type = $entity_export['representation']['entity_type'][0]['value'];
+      $entity_export['representation']['entity_id'][0]['value'] = osk_content_import_hash_id($type, $id);
+    }
+    // Make sure that this runs after the file is created.
+    if (isset($entity_export['level'])) {
+      $entity_export['level'] = $entity_export['level'] > 1 ? $entity_export['level'] - 1 : $entity_export['level'];
+    }
+    // Since CID is unique, remove it.
+    unset($entity_export['representation']['cid']);
+  }
+}

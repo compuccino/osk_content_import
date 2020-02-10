@@ -1,0 +1,6 @@
+osk_test_content_install.info:
+  path: '/osk/test_content_mapping.json'
+  defaults:
+    _controller: '\Drupal\osk_test_content_install\Controller\OskTestContentInstall::showMapping'
+  requirements:
+    _access: 'TRUE'

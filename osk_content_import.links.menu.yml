@@ -1,0 +1,11 @@
+osk_content_import.config_form:
+  title: 'OSK Content Export settings'
+  description: 'OSK Content Export settings.'
+  parent: system.admin_config_content
+  route_name: osk_content_import.config_form
+
+osk_content_import.import_entity_form:
+  title: 'OSK Content Import'
+  description: 'OSK Content Import.'
+  parent: system.admin_content
+  route_name: osk_content_import.import_entity_form

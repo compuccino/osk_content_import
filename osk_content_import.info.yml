@@ -1,0 +1,6 @@
+name: OSK Content Import/Export
+description: This module imports and exports content.
+package: OSK
+
+type: module
+core: 8.x

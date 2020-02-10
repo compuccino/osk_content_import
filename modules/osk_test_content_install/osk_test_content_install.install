@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Install test content.
+ */
+
+/**
+ * Install test content.
+ */
+function osk_test_content_install_install() {
+    $input_file = 'public://osk_mapper.json';
+    foreach (glob('../tests/resources/content/*.yml') as $file) {
+      $node = osk_content_import_import($file);
+      $options = ['absolute' => FALSE, 'attributes' => ['class' => 'this-class']];
+      $url = \Drupal\Core\Url::fromRoute('entity.node.canonical', ['node' => $node->id()], $options)->toString();
+      $mapping_id = str_replace(['../tests/resources/content/', '.yml'], '', $file);
+      $mapping[$mapping_id]['url'] = $url;
+      $mapping[$mapping_id]['id'] = $node->id();
+    }
+    file_unmanaged_save_data(json_encode($mapping), $input_file, FILE_EXISTS_REPLACE);
+}

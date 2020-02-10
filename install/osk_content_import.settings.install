@@ -1,0 +1,7 @@
+cloud_available: 1
+cloud_blob_type:
+cloud_cache_dir: cloud_cache_files
+digitalocean_url:
+digitalocean_prefix:
+digitalocean_key:
+digitalocean_secret:

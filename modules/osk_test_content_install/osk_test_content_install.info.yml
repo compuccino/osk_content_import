@@ -1,0 +1,6 @@
+name: OSK Test Content Installer
+description: Installs all test content. That's all.
+package: OSK
+
+type: module
+core: 8.x

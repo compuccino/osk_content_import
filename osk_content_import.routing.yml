@@ -1,0 +1,29 @@
+osk_content_import.config_form:
+  path: '/admin/config/content/osk_content_export_settings'
+  defaults:
+    _title: 'OSK Social Media Importer settings'
+    _form: '\Drupal\osk_content_import\Form\OskContentImportSettingsForm'
+  requirements:
+    _permission: 'manage osk export module'
+  options:
+    _admin_route: true
+
+osk_content_import.import_entity_form:
+  path: '/admin/content/osk-import'
+  defaults:
+    _title: 'OSK Import Content'
+    _form: '\Drupal\osk_content_import\Form\OskContentEntityImport'
+  requirements:
+    _permission: 'import content as yaml'
+  options:
+    _admin_route: true
+
+osk_content_import.export_entity_form:
+  path: '/admin/osk/export/{entity_type}/{id}'
+  defaults:
+    _title: 'OSK Export Content'
+    _form: '\Drupal\osk_content_import\Form\OskContentEntityExport'
+  requirements:
+    _permission: 'export content as yaml'
+  options:
+    _admin_route: true

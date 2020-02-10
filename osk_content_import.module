@@ -1,0 +1,125 @@
+<?php
+
+/**
+ * @file
+ * Contains osk_content_import.module.
+ */
+
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
+use Drupal\Core\Url;
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function osk_content_import_menu_local_tasks_alter(&$data, $route_name, RefinableCacheableDependencyInterface &$cacheability) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if (substr($route_name, 0, 7) == 'entity.' && substr($route_name, -4) == 'form') {
+    $page_entity = osk_content_import_get_page_entity();
+    if (is_object($page_entity)) {
+      $data['tabs'][0]['osk_content_import.export_entity_form'] = [
+        '#theme' => 'menu_local_task',
+        '#link' => [
+          'title' => t('Export'),
+          'url' => Url::fromRoute('osk_content_import.export_entity_form', [
+            'entity_type' => $page_entity->getEntityTypeId(),
+            'id' => $page_entity->id(),
+          ]),
+          'localized_options' => [
+            'attributes' => [
+              'title' => t('Export this content'),
+            ],
+          ],
+        ],
+      ];
+    }
+
+    $cacheability
+      ->addCacheTags([
+        'user.permissions',
+      ]);
+  }
+}
+
+/**
+ * Global function to import content.
+ */
+function osk_content_import_import($file, $uri = '', $uid = NULL, $remove_timestamp = TRUE) {
+  $importer = \Drupal::service('osk_content_import.osk_content_import');
+  return $importer->import($file, $uri, $uid, $remove_timestamp);
+}
+
+/**
+ * Global function to import content and get all created dependencies back.
+ */
+function osk_content_import_behat($file, $uri = '', $uid = NULL, $remove_timestamp = TRUE) {
+  $importer = \Drupal::service('osk_content_import.osk_content_import');
+  return $importer->importWithNestedOutput($file, $uri, $uid, $remove_timestamp);
+}
+
+/**
+ * Helper funtion to get an entity from a route.
+ */
+function osk_content_import_get_page_entity() {
+  $page_entity = &drupal_static(__FUNCTION__, NULL);
+  if (isset($page_entity)) {
+    return $page_entity ?: NULL;
+  }
+  $current_route = \Drupal::routeMatch();
+  foreach ($current_route->getParameters() as $param) {
+    if ($param instanceof EntityInterface) {
+      $page_entity = $param;
+      break;
+    }
+  }
+  if (!isset($page_entity)) {
+    // Some routes don't properly define entity parameters.
+    // Thus, try to load them by its raw Id, if given.
+    $entity_type_manager = \Drupal::entityTypeManager();
+    $types = $entity_type_manager->getDefinitions();
+    foreach ($current_route->getParameters()->keys() as $param_key) {
+      if (!isset($types[$param_key])) {
+        continue;
+      }
+      if ($param = $current_route->getParameter($param_key)) {
+        if (is_string($param) || is_numeric($param)) {
+          try {
+            $page_entity = $entity_type_manager->getStorage($param_key)->load($param);
+          }
+          catch (\Exception $e) {
+          }
+        }
+        break;
+      }
+    }
+  }
+  if (!isset($page_entity) || !$page_entity->access('view')) {
+    $page_entity = FALSE;
+    return NULL;
+  }
+  return $page_entity;
+}
+
+/**
+ * Function to clean up labels.
+ */
+function osk_content_import_entity_naming($entity, $entity_type) {
+  $name = t('Not known');
+  switch ($entity_type) {
+    case 'paragraph':
+      $name = 'Paragraph ' . $entity->bundle();
+      break;
+
+    default:
+      $name = $entity->label();
+      break;
+  }
+  return $name;
+}
+
+/**
+ * Function to create hash id from an entity.
+ */
+function osk_content_import_hash_id($entity_type, $entity_id) {
+  return md5($entity_type . '_' . $entity_id);
+}
