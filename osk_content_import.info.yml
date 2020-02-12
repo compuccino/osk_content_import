@@ -4,3 +4,8 @@ package: OSK
 
 type: module
 core: 8.x
+
+dependencies:
+  - menu_export
+  - path
+  - pathauto
