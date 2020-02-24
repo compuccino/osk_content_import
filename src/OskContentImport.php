@@ -368,9 +368,7 @@ class OskContentImport {
     }
     mkdir($tmp, 0777);
     $filepath = \Drupal::service('file_system')->realpath($filepath);
-    $phar = new \PharData($filepath);
-    // Untar to temp.
-    $phar->extractTo($tmp);
+    exec("cd $tmp && tar -xzf $filepath");
 
     // Find the yaml.
     $this->workingDir = $tmp;

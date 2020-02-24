@@ -145,9 +145,7 @@ class OskContentExport {
     $output_file = '';
     if (!$blob) {
       $output_file = $this->tmpDir . '/' . $exported_entities[0]['entity_id'] . '.tgz';
-      $phar = new \PharData($output_file);
-      $phar->buildFromDirectory($this->tmpDir);
-      $phar->compress(\Phar::GZ);
+      exec("cd $this->tmpDir && tar -czf $output_file *");
       $this->outputFilename = $this->uuid . '.tgz';
     }
 
