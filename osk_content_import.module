@@ -51,7 +51,6 @@ function osk_content_import_import($file, $uri = '', $uid = NULL, $remove_timest
   return $importer->import($file, $uri, $uid, $remove_timestamp);
 }
 
-
 /**
  * Global function to import menus.
  */
@@ -70,7 +69,8 @@ function osk_content_import_menu() {
       ->execute();
     if (!$menuLinkEntity) {
       $menuLinkEntity = MenuLinkContent::create();
-    }else{
+    }
+    else {
       $menuLinkEntity = MenuLinkContent::load(reset($menuLinkEntity));
     }
     foreach ($menu as $kkey => $items) {
@@ -80,10 +80,11 @@ function osk_content_import_menu() {
     unset($menuLinkEntity);
 
   }
-  if(count($invalidMenus)){
-    drupal_set_message(t('Menu(s) @menus not found',['@menus'=>implode(',',$invalidMenus)]),'error');
-  }else{
-    drupal_set_message(t('Menu(s) imported successfully'),'success');
+  if (count($invalidMenus)) {
+    drupal_set_message('Menu(s) @menus not found', ['@menus' => implode(',', $invalidMenus)], 'error');
+  }
+  else {
+    drupal_set_message('Menu(s) imported successfully', 'success');
   }
 }
 
