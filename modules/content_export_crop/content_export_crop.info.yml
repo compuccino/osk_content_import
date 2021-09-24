@@ -8,3 +8,6 @@ core: 8.x
 dependencies:
   - osk_content_import
   - drupal:crop
+
+core_version_requirement: ^8 || ^9
+
