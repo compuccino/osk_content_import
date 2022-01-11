@@ -4,6 +4,7 @@ namespace Drupal\osk_content_import;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\FileSystemInterface;
 use Symfony\Component\Yaml\Yaml;
 use Drupal\osk_content_import\Blobstorage\DigitalOcean;
 
@@ -83,16 +84,26 @@ class OskContentExport {
   protected $uuid;
 
   /**
+   * A FileSystem instance.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
+
+  /**
    * Constructs a OskContentExport object.
    *
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    *   The entity field manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
+   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
+   *   A file system instance.
    */
-  public function __construct(EntityFieldManagerInterface $entity_field_manager, ConfigFactoryInterface $config_factory) {
+  public function __construct(EntityFieldManagerInterface $entity_field_manager, ConfigFactoryInterface $config_factory, FileSystemInterface $fileSystem) {
     $this->entityFieldManager = $entity_field_manager;
     $this->configFactory = $config_factory;
+    $this->fileSystem = $fileSystem;
   }
 
   /**
@@ -290,7 +301,7 @@ class OskContentExport {
             $dest_file = str_replace('public://', '', $file['value']);
             $dest_dir = 'files/' . str_replace(basename($file['value']), '', $dest_file);
             if (!file_exists($this->tmpDir . '/' . $dest_dir)) {
-              drupal_mkdir($this->tmpDir . '/' . $dest_dir, NULL, TRUE);
+              $this->fileSystem->mkdir($this->tmpDir . '/' . $dest_dir, NULL, TRUE);
             }
             copy($file['value'], $this->tmpDir . '/' . $dest_dir . '/' . basename($file['value']));
             $this->files[] = $this->tmpDir . '/' . $dest_dir . '/' . basename($file['value']);
@@ -306,14 +317,14 @@ class OskContentExport {
    * Helper function to create an tmp dir.
    */
   protected function createTmpDir() {
-    $tmp = file_directory_temp() . '/osk_content';
+    $tmp = $this->fileSystem->getTempDirectory() . '/osk_content';
     if (file_exists($tmp)) {
-      file_unmanaged_delete_recursive($tmp);
+      $this->fileSystem->deleteRecursive($tmp);
     }
     mkdir($tmp, 0777);
-    $this->tmpDir = file_directory_temp() . '/osk_content/' . md5(microtime(TRUE) . time());
+    $this->tmpDir = $this->fileSystem->getTempDirectory() . '/osk_content/' . md5(microtime(TRUE) . time());
     if (!file_exists($this->tmpDir)) {
-      drupal_mkdir($this->tmpDir, NULL, TRUE);
+      $this->fileSystem->mkdir($this->tmpDir, NULL, TRUE);
     }
   }
 
