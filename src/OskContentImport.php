@@ -234,6 +234,7 @@ class OskContentImport {
   protected function importFile(array $file_array, $level) {
     // Check where the file is located.
     $file_path = $file_array['representation']['uri'][0];
+    $uuid = $file_array['representation']['uuid'][0]['value'] ?? NULL;
     if (substr($file_path, 0, 15) == 'digitalocean://') {
       $config = $this->configFactory->get('osk_content_import.settings');
       // Download the file from digitalocean.
@@ -255,6 +256,10 @@ class OskContentImport {
     $file = File::create([
       'uri' => $uri,
     ]);
+    if ($uuid) {
+      $file->set('uuid', $uuid);
+    }
+
     $file->save();
     $this->keyMap[$file_array['entity_id']] = $file->id();
 
