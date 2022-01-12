@@ -7,4 +7,4 @@ services:
     arguments: ['@entity_field.manager', '@config.factory', '@file_system']
   osk_content_import.osk_content_import:
     class: Drupal\osk_content_import\OskContentImport
-    arguments: ['@entity_field.manager', '@config.factory']
+    arguments: ['@entity_field.manager', '@config.factory', '@file_system']

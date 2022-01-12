@@ -4,6 +4,8 @@ namespace Drupal\osk_content_import;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\file\Entity\File;
 use Symfony\Component\Yaml\Yaml;
 use Drupal\osk_content_import\Blobstorage\DigitalOcean;
 use Drupal\pathauto\PathautoState;
@@ -63,16 +65,43 @@ class OskContentImport {
   protected $removeTimestamps;
 
   /**
+   * A FileSystem instance.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
+
+  /**
+   * The path of the base directory for asset files to import.
+   *
+   * @var string
+   */
+  protected $filesBaseDir;
+
+  /**
    * Constructs a OskContentImport object.
    *
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    *   The entity field manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
+   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
+   *   A file system instance.
    */
-  public function __construct(EntityFieldManagerInterface $entity_field_manager, ConfigFactoryInterface $config_factory) {
+  public function __construct(EntityFieldManagerInterface $entity_field_manager, ConfigFactoryInterface $config_factory, FileSystemInterface $fileSystem) {
     $this->entityFieldManager = $entity_field_manager;
     $this->configFactory = $config_factory;
+    $this->fileSystem = $fileSystem;
+  }
+
+  /**
+   * Set the base directory path for asset files to import.
+   *
+   * @param string $path
+   *   The path to set.
+   */
+  public function setAssetFilesBaseDir(string $path) {
+    $this->filesBaseDir = $path;
   }
 
   /**
@@ -213,19 +242,22 @@ class OskContentImport {
     }
     else {
       $data['path'] = 'public://' . $file_path;
-      $data['file'] = $this->workingDir . '/' . $file_path;
+      $data['file'] = $this->filesBaseDir . '/' . $file_path;
     }
 
     // Create all directories if they do not exist.
     $path = dirname($data['path']);
-    if (!file_prepare_directory($path)) {
-      $file_system = \Drupal::service('file_system');
-      $file_system->mkdir($path, 0777, TRUE);
+    if (!$this->fileSystem->prepareDirectory($path)) {
+      $this->fileSystem->mkdir($path, 0777, TRUE);
     }
 
-    $file = file_save_data(file_get_contents($data['file']), $data['path']);
-
+    $uri = $this->fileSystem->saveData(file_get_contents($data['file']), $data['path']);
+    $file = File::create([
+      'uri' => $uri,
+    ]);
+    $file->save();
     $this->keyMap[$file_array['entity_id']] = $file->id();
+
     return $file;
   }
 
@@ -362,12 +394,12 @@ class OskContentImport {
    */
   protected function untarFile($filepath) {
     // Make sure that the temp is empty.
-    $tmp = file_directory_temp() . '/osk_content';
+    $tmp = $this->fileSystem->getTempDirectory() . '/osk_content';
     if (file_exists($tmp)) {
-      $this->rrmdir($tmp);
+      $this->fileSystem->deleteRecursive($tmp);
     }
-    mkdir($tmp, 0777);
-    $filepath = \Drupal::service('file_system')->realpath($filepath);
+    $this->fileSystem->mkdir($tmp, 0777);
+    $filepath = $this->fileSystem->realpath($filepath);
     exec("cd $tmp && tar -xzf $filepath");
 
     // Find the yaml.
@@ -380,29 +412,6 @@ class OskContentImport {
       }
     }
     return $working_file;
-  }
-
-  /**
-   * Helper function to remove recursivley.
-   *
-   * @param string $src
-   *   The source path to itterate and remove files and dirs in.
-   */
-  protected function rrmdir($src) {
-    $dir = opendir($src);
-    while (FALSE !== ($file = readdir($dir))) {
-      if (($file != '.') && ($file != '..')) {
-        $full = $src . '/' . $file;
-        if (is_dir($full)) {
-          $this->rrmdir($full);
-        }
-        else {
-          unlink($full);
-        }
-      }
-    }
-    closedir($dir);
-    rmdir($src);
   }
 
 }

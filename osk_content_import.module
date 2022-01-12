@@ -90,8 +90,11 @@ function osk_content_import_menu() {
 /**
  * Global function to import content and get all created dependencies back.
  */
-function osk_content_import_behat($file, $uri = '', $uid = NULL, $remove_timestamp = TRUE) {
+function osk_content_import_behat($file, $uri = '', $uid = NULL, $remove_timestamp = TRUE, string $contentFilesDir = '../tests/resources/files/') {
+  /** @var \Drupal\osk_content_import\OskContentImport $importer */
   $importer = \Drupal::service('osk_content_import.osk_content_import');
+  $importer->setAssetFilesBaseDir($contentFilesDir);
+
   return $importer->importWithNestedOutput($file, $uri, $uid, $remove_timestamp);
 }
 
