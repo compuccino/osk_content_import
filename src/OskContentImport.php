@@ -203,6 +203,10 @@ class OskContentImport {
       case 'paragraph':
         $entity = $this->importParagraph($entity_array, $level);
         break;
+      
+      case 'media':
+        $entity = $this->importMedia($entity_array, $level);
+        break;
 
       default:
         // Let other modules import manually.
@@ -321,10 +325,25 @@ class OskContentImport {
   }
 
   /**
+   * Media importer of entities.
+   *
+   * @param array $entity_array
+   *   An media array to import.
+   * @param int $level
+   *   The level in the hierarchy of the entity being imported.
+   *
+   * @return \Drupal\Core\Entity
+   *   A full entity object.
+   */
+  protected function importMedia(array $entity_array, $level) {
+    return $this->importBase($entity_array, $level, 'mid');
+  }
+
+  /**
    * Default importer of entities.
    *
    * @param array $entity_array
-   *   An file array to import.
+   *   An array to import.
    * @param int $level
    *   The level in the hierarchy of the entity being imported.
    *
@@ -332,6 +351,23 @@ class OskContentImport {
    *   A full entity object.
    */
   protected function importDefault(array $entity_array, $level) {
+    return $this->importBase($entity_array, $level);
+  }
+
+  /**
+   * Base importer of entities.
+   *
+   * @param array $entity_array
+   *   An file array to import.
+   * @param int $level
+   *   The level in the hierarchy of the entity being imported.
+   * @param string $id
+   *   The id to use.
+   *
+   * @return \Drupal\Core\Entity
+   *   A full entity object.
+   */
+  protected function importBase(array $entity_array, $level, $id = 'id') {
     $entity_controller = \Drupal::entityTypeManager()->getStorage($entity_array['entity_type']);
     // Make sure to replace any entity field.
     $entity_prepared = [];
@@ -364,7 +400,7 @@ class OskContentImport {
         }
       }
     }
-    unset($entity_prepared['id']);
+    unset($entity_prepared[$id]);
     $entity_prepared['uid'] = !is_null($this->author) ? $this->author : \Drupal::currentUser()->id();
     unset($entity_prepared['nid']);
     if ($this->removeTimestamps && isset($entity_prepared['created'])) {
