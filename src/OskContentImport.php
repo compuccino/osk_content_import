@@ -211,10 +211,13 @@ class OskContentImport {
       default:
         // Let other modules import manually.
         $found = FALSE;
-        foreach (\Drupal::moduleHandler()->hasImplementations('oci_import_entity_' . $entity_array['entity_type']) as $module) {
-          $function = $module . 'oci_import_entity_' . $entity_array['entity_type'];
-          $function($entity_array, $level);
-          $found = TRUE;
+        $moduleHandler = \Drupal::moduleHandler();
+        foreach ($moduleHandler->getModuleList() as $module) {
+          if ($moduleHandler->hasImplementations('oci_import_entity_' . $entity_array['entity_type'])) {
+            $function = $module . 'oci_import_entity_' . $entity_array['entity_type'];
+            $function($entity_array, $level);
+            $found = TRUE;
+          }
         }
         if (!$found) {
           $entity = $this->importDefault($entity_array, $level);
