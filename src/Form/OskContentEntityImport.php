@@ -111,6 +111,7 @@ class OskContentEntityImport extends FormBase {
    */
   private function getUserOptions() {
     $ids = \Drupal::entityQuery('user')
+      ->accessCheck(TRUE)
       ->condition('status', 1)
       ->execute();
     $users = User::loadMultiple($ids);

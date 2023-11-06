@@ -12,7 +12,7 @@ function content_export_crop_oci_extend_entity_tree(&$dependencies, &$previous, 
   $entity_tree = \Drupal::service('osk_content_import.osk_get_entity_tree');
   if ($entity_type == 'file') {
     // Query for crops for this file.
-    $query = \Drupal::entityTypeManager()->getStorage('crop')->getQuery();
+    $query = \Drupal::entityTypeManager()->getStorage('crop')->getQuery()->accessCheck(TRUE);
     $cids = $query->condition('entity_id', $id)->condition('entity_type', $entity_type)->execute();
     $i = 0;
     foreach ($cids as $cid) {

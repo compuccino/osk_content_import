@@ -66,6 +66,7 @@ function osk_content_import_menu() {
     }
     unset($menu['id']);
     $menuLinkEntity = \Drupal::entityQuery('menu_link_content')
+      ->accessCheck(TRUE)
       ->condition('uuid', $menu['uuid'])
       ->execute();
     if (!$menuLinkEntity) {
