@@ -203,7 +203,7 @@ class OskContentImport {
       case 'paragraph':
         $entity = $this->importParagraph($entity_array, $level);
         break;
-      
+
       case 'media':
         $entity = $this->importMedia($entity_array, $level);
         break;
@@ -211,7 +211,7 @@ class OskContentImport {
       default:
         // Let other modules import manually.
         $found = FALSE;
-        foreach (\Drupal::moduleHandler()->getImplementations('oci_import_entity_' . $entity_array['entity_type']) as $module) {
+        foreach (\Drupal::moduleHandler()->hasImplementations('oci_import_entity_' . $entity_array['entity_type']) as $module) {
           $function = $module . 'oci_import_entity_' . $entity_array['entity_type'];
           $function($entity_array, $level);
           $found = TRUE;
