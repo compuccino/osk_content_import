@@ -94,9 +94,12 @@ class OskGetEntityTree {
     }
 
     // Let other modules alter the entity tree.
-    foreach (\Drupal::moduleHandler()->getImplementations('oci_extend_entity_tree') as $module) {
-      $function = $module . '_oci_extend_entity_tree';
-      $function($dependencies, $previous, $entity, $entity_type, $id, $bundle_type);
+    $moduleHandler = \Drupal::moduleHandler();
+    foreach ($moduleHandler->getModuleList() as $module) {
+      if ($moduleHandler->hasImplementations('oci_extend_entity_tree')) {
+        $function = $module . '_oci_extend_entity_tree';
+        $function($dependencies, $previous, $entity, $entity_type, $id, $bundle_type);
+      }
     }
 
     $output[] = [

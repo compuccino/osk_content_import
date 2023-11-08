@@ -271,9 +271,12 @@ class OskContentExport {
         }
       }
     }
-    foreach (\Drupal::moduleHandler()->getImplementations('oci_export_entity_alter') as $module) {
-      $function = $module . '_oci_export_entity_alter';
-      $function($entity_meta);
+    $moduleHandler = \Drupal::moduleHandler();
+    foreach ($moduleHandler->getModuleList() as $module) {
+      if ($moduleHandler->hasImplementations('_oci_export_entity_alter')) {
+        $function = $module . '_oci_export_entity_alter';
+        $function($entity_meta);
+      }
     }
     return $entity_meta;
   }
